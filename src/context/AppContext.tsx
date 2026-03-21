@@ -1,7 +1,10 @@
 "use client";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export type Language = "en" | "ml";
+export type Language = 
+  | "en" | "as" | "bn" | "brx" | "doi" | "gu" | "hi" | "kn" | "ks" 
+  | "kok" | "mai" | "ml" | "mni" | "mr" | "ne" | "or" | "pa" | "sa" 
+  | "sat" | "sd" | "ta" | "te" | "ur";
 
 export type CropType = "pineapple" | "rubber" | "rice" | "palm_oil" | "coffee" | "spices" | "sugarcane" | "tea";
 
@@ -60,6 +63,7 @@ const CROP_PROFILES: Record<CropType, {
   label: string;
   labelMl: string;
   icon: string;
+  image: string;
   stages: GrowthStage[];
   growthDays: number;
   basePrice: number; // ₹ per quintal
@@ -70,6 +74,7 @@ const CROP_PROFILES: Record<CropType, {
   pineapple: {
     label: "Pineapple", labelMl: "കൈതച്ചക്ക",
     icon: "🍍",
+    image: "/images/crops/crop_pineapple.png",
     stages: [
       { name: "Sowing", startDay: 0, endDay: 30, icon: "🌱" },
       { name: "Vegetative", startDay: 31, endDay: 270, icon: "🌿" },
@@ -86,6 +91,7 @@ const CROP_PROFILES: Record<CropType, {
   rubber: {
     label: "Rubber", labelMl: "റബ്ബർ",
     icon: "🌳",
+    image: "/images/crops/crop_rubber.png",
     stages: [
       { name: "Sowing", startDay: 0, endDay: 60, icon: "🌱" },
       { name: "Vegetative", startDay: 61, endDay: 1000, icon: "🌿" },
@@ -102,6 +108,7 @@ const CROP_PROFILES: Record<CropType, {
   rice: {
     label: "Rice", labelMl: "നെല്ല്",
     icon: "🌾",
+    image: "/images/crops/crop_rice.png",
     stages: [
       { name: "Sowing", startDay: 0, endDay: 15, icon: "🌱" },
       { name: "Vegetative", startDay: 16, endDay: 60, icon: "🌿" },
@@ -118,6 +125,7 @@ const CROP_PROFILES: Record<CropType, {
   palm_oil: {
     label: "Palm Oil", labelMl: "പനസ",
     icon: "🌴",
+    image: "/images/crops/crop_palm_oil.png",
     stages: [
       { name: "Sowing", startDay: 0, endDay: 90, icon: "🌱" },
       { name: "Vegetative", startDay: 91, endDay: 1095, icon: "🌿" },
@@ -134,6 +142,7 @@ const CROP_PROFILES: Record<CropType, {
   coffee: {
     label: "Coffee", labelMl: "കാപ്പി",
     icon: "☕",
+    image: "/images/crops/crop_coffee.png",
     stages: [
       { name: "Sowing", startDay: 0, endDay: 60, icon: "🌱" },
       { name: "Vegetative", startDay: 61, endDay: 900, icon: "🌿" },
@@ -150,6 +159,7 @@ const CROP_PROFILES: Record<CropType, {
   spices: {
     label: "Spices", labelMl: "മസാല",
     icon: "🌶️",
+    image: "/images/crops/crop_spices.png",
     stages: [
       { name: "Sowing", startDay: 0, endDay: 30, icon: "🌱" },
       { name: "Vegetative", startDay: 31, endDay: 120, icon: "🌿" },
@@ -166,6 +176,7 @@ const CROP_PROFILES: Record<CropType, {
   sugarcane: {
     label: "Sugarcane", labelMl: "കരിമ്പ്",
     icon: "🎋",
+    image: "/images/crops/crop_sugarcane.png",
     stages: [
       { name: "Sowing", startDay: 0, endDay: 30, icon: "🌱" },
       { name: "Vegetative", startDay: 31, endDay: 200, icon: "🌿" },
@@ -182,6 +193,7 @@ const CROP_PROFILES: Record<CropType, {
   tea: {
     label: "Tea", labelMl: "ചായ",
     icon: "🍵",
+    image: "/images/crops/crop_tea.png",
     stages: [
       { name: "Sowing", startDay: 0, endDay: 60, icon: "🌱" },
       { name: "Vegetative", startDay: 61, endDay: 730, icon: "🌿" },
@@ -205,11 +217,14 @@ interface AppState {
   activePage: string;
   setActivePage: (p: string) => void;
   plots: Plot[];
+  userPlots: Plot[]; // Only plots added by user during onboarding/Fields
   activePlot: Plot | null;
-  setActivePlot: (p: Plot) => void;
+  setActivePlot: (p: Plot | null) => void;
   sensorData: SensorData;
+  theme: "light" | "dark";
+  setTheme: (theme: "light" | "dark") => void;
   weather: WeatherForecast[];
-  npk: NPK;
+  npk: NPK | null;
   notifications: Notification[];
   markNotificationRead: (id: string) => void;
   onboarded: boolean;
@@ -222,6 +237,9 @@ interface AppState {
   isAuthenticated: boolean;
   login: (email: string, pass: string) => boolean;
   logout: () => void;
+  addPlot: (p: Plot) => void;
+  updatePlot: (id: string, updates: Partial<Plot>) => void;
+  clearData: () => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -237,26 +255,7 @@ function generateSensor(): SensorData {
   };
 }
 
-const DEMO_PLOTS: Plot[] = [
-  {
-    id: "plot-alpha-7",
-    name: "Plot Alpha-7",
-    crop: "pineapple",
-    area: 1.2,
-    coordinates: [[8.5241, 76.9366], [8.5245, 76.9380], [8.5230, 76.9385], [8.5225, 76.9370]],
-    soilPH: 6.5,
-    soilHealth: 84,
-  },
-  {
-    id: "plot-beta-2",
-    name: "Plot Beta-2",
-    crop: "rubber",
-    area: 2.8,
-    coordinates: [[8.5260, 76.9400], [8.5268, 76.9418], [8.5248, 76.9422], [8.5240, 76.9405]],
-    soilPH: 5.8,
-    soilHealth: 72,
-  },
-];
+const DEMO_PLOTS: Plot[] = [];
 
 const DEMO_WEATHER: WeatherForecast[] = [
   { day: "Today", condition: "Partly Cloudy", high: 30, low: 24, rainfallProbability: 20, rainfall: 0, icon: "⛅" },
@@ -308,21 +307,70 @@ const DEMO_NOTIFICATIONS: Notification[] = [
 export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("en");
   const [activePage, setActivePage] = useState("dashboard");
-  const [plots] = useState<Plot[]>(DEMO_PLOTS);
-  const [activePlot, setActivePlot] = useState<Plot>(DEMO_PLOTS[0]);
+  const [plots, setPlots] = useState<Plot[]>(DEMO_PLOTS);
+  const [userPlots, setUserPlots] = useState<Plot[]>([]); // Plots created by user
+  const [activePlot, setActivePlot] = useState<Plot | null>(DEMO_PLOTS[0] ?? null);
   const [sensorData, setSensorData] = useState<SensorData>(generateSensor());
   const [notifications, setNotifications] = useState<Notification[]>(DEMO_NOTIFICATIONS);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [onboarded, setOnboarded] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<CropType | null>(null);
   const [daysPlanted] = useState(145);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const [isClient, setIsClient] = useState(false);
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSensorData(generateSensor());
-    }, 5000);
-    return () => clearInterval(interval);
+    setIsClient(true);
+    try {
+      const storedLang = localStorage.getItem("agrow_lang") as Language;
+      const storedPlots = localStorage.getItem("agrow_plots");
+      const storedUserPlots = localStorage.getItem("agrow_user_plots");
+      const storedOnboarded = localStorage.getItem("agrow_onboarded");
+      const storedCrop = localStorage.getItem("agrow_selectedCrop") as CropType;
+      const storedAuth = localStorage.getItem("agrow_auth");
+      const storedTheme = localStorage.getItem("agrow_theme") as "light" | "dark";
+      
+      if (storedLang) setLanguage(storedLang);
+      if (storedPlots) {
+        const parsed = JSON.parse(storedPlots);
+        if (parsed && parsed.length > 0) {
+          setPlots(parsed);
+          setActivePlot(parsed[0]);
+        }
+      }
+      if (storedUserPlots) {
+        const parsedUser = JSON.parse(storedUserPlots);
+        if (parsedUser && parsedUser.length > 0) {
+          setUserPlots(parsedUser);
+          setActivePlot(parsedUser[0]);
+        }
+      }
+      if (storedOnboarded) setOnboarded(storedOnboarded === "true");
+      if (storedCrop) setSelectedCrop(storedCrop);
+      if (storedAuth) setIsAuthenticated(storedAuth === "true");
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        setTheme("dark");
+      }
+    } catch (e) {
+      console.error("Error reading localStorage", e);
+    }
   }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+    localStorage.setItem("agrow_lang", language);
+    localStorage.setItem("agrow_plots", JSON.stringify(plots));
+    localStorage.setItem("agrow_user_plots", JSON.stringify(userPlots));
+    localStorage.setItem("agrow_onboarded", onboarded.toString());
+    localStorage.setItem("agrow_selectedCrop", selectedCrop || "");
+    localStorage.setItem("agrow_auth", isAuthenticated.toString());
+    localStorage.setItem("agrow_theme", theme);
+    
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [isClient, language, plots, userPlots, onboarded, selectedCrop, isAuthenticated, theme]);
 
   const markNotificationRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
@@ -343,14 +391,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
   };
 
+  const addPlot = (p: Plot) => {
+    setPlots(prev => [p, ...prev]);
+    setUserPlots(prev => [p, ...prev]);
+    setActivePlot(p);
+  };
+
+  const updatePlot = (id: string, updates: Partial<Plot>) => {
+    setPlots(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+    setUserPlots(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+    setActivePlot(prev => prev?.id === id ? { ...prev, ...updates } : prev);
+  };
+
+  const clearData = () => {
+    localStorage.clear();
+    setPlots(DEMO_PLOTS);
+    setUserPlots([]);
+    setActivePlot(DEMO_PLOTS[0] ?? null);
+    setOnboarded(false);
+    setSelectedCrop(null);
+    setIsAuthenticated(false);
+    setLanguage("en");
+    setActivePage("dashboard");
+  };
+
+  if (!isClient) return null;
+
   return (
     <AppContext.Provider value={{
       language, setLanguage,
       activePage, setActivePage,
-      plots, activePlot, setActivePlot,
+      plots, userPlots, activePlot, setActivePlot,
       sensorData,
       weather: DEMO_WEATHER,
-      npk: CROP_PROFILES[activePlot?.crop ?? "pineapple"].npkNeeds,
+      npk: activePlot ? CROP_PROFILES[activePlot.crop].npkNeeds : null,
       notifications, markNotificationRead,
       onboarded, setOnboarded,
       selectedCrop, setSelectedCrop,
@@ -360,6 +434,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isAuthenticated,
       login,
       logout,
+      addPlot,
+      updatePlot,
+      clearData,
+      theme,
+      setTheme,
     }}>
       {children}
     </AppContext.Provider>

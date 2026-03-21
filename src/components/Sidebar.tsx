@@ -2,12 +2,12 @@
 import { useApp } from "@/context/AppContext";
 import { tr } from "@/lib/translations";
 import { 
-  LayoutDashboard, Map, BarChart3, ShoppingBag, 
-  BookMarked, LifeBuoy, Languages, LogOut, Leaf, Cloud
+  LayoutDashboard, Map, BarChart3, Store, BookOpen, LifeBuoy, Sprout, LogOut, Moon, Sun, ShoppingBag, BookMarked, Leaf, Cloud
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Sidebar() {
-  const { language, setLanguage, activePage, setActivePage, logout } = useApp();
+  const { activePage, setActivePage, logout, language, setLanguage, theme, setTheme } = useApp();
 
   const NAV_ITEMS = [
     { id: "dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
@@ -23,47 +23,62 @@ export default function Sidebar() {
       width: 280,
       minWidth: 280,
       height: "100%",
-      background: "var(--bg-dark)",
+      background: "var(--bg-surface)", // Use surface color
       borderRight: "1px solid var(--border-line)",
       display: "flex",
       flexDirection: "column",
-      padding: "32px 20px",
+      padding: "24px 16px",
       gap: 32,
       zIndex: 100,
     }}>
       {/* Brand Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, paddingLeft: 12 }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: 10,
-          background: "var(--accent-primary)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 8px 16px -4px rgba(0, 209, 160, 0.4)",
-        }}>
+        <motion.div 
+          whileHover={{ rotate: 15 }}
+          style={{
+            width: 40, height: 40, borderRadius: 12,
+            background: "var(--accent-primary)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
           <Leaf size={24} color="#FFF" strokeWidth={2.5} />
-        </div>
+        </motion.div>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 900, color: "var(--text-main)", letterSpacing: "1px", textTransform: "uppercase" }}>
-            AGROW
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text-main)", letterSpacing: "-0.03em" }}>
+            Farmio
           </h1>
-          <div style={{ fontSize: 10, color: "var(--text-ghost)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: -2 }}>
-            Intelligence
-          </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+      <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
         {NAV_ITEMS.map((item) => {
           const isActive = activePage === item.id;
           return (
-            <div 
+            <motion.div 
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               key={item.id}
               className={`side-link ${isActive ? 'active' : ''}`}
               onClick={() => setActivePage(item.id as any)}
+              style={{ position: "relative" }}
             >
+              {isActive && (
+                <motion.div
+                  layoutId="active-nav-bg"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: 100,
+                    background: "var(--accent-soft)",
+                    zIndex: -1,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
               {item.icon}
               <span style={{ fontSize: 14 }}>{tr(item.id, language)}</span>
-            </div>
+            </motion.div>
           );
         })}
       </nav>
@@ -71,32 +86,37 @@ export default function Sidebar() {
       {/* Footer / Utilities */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{
-          padding: 16, borderRadius: 16,
-          background: "var(--bg-surface)",
+          padding: "16px 20px", borderRadius: 20,
+          background: "var(--bg-dark)",
+          border: "1px solid var(--border-line)",
           display: "flex", alignItems: "center", gap: 12
         }}>
-          <Cloud size={20} color="var(--accent-primary)" />
+          <Cloud size={24} color="var(--accent-primary)" />
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700 }}>28°C</div>
-            <div style={{ fontSize: 10, color: "var(--text-dim)" }}>Mostly Clear</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-main)" }}>28°C</div>
+            <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 500 }}>{tr("Mostly Clear", language)}</div>
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 8 }}>
-          <button 
-            onClick={() => setLanguage(language === "en" ? "ml" : "en")}
-            className="btn-secondary" 
-            style={{ flex: 1, padding: "10px", borderRadius: 10 }}
+          <div style={{ flex: 1 }} />
+          <motion.button 
+            whileHover={{ scale: 1.05, backgroundColor: "var(--bg-surface)" }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            style={{ width: 44, minWidth: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-card)", color: "var(--text-main)", border: "1px solid var(--border-line)", cursor: "pointer", boxShadow: "var(--shadow-sm)" }}
           >
-            <Languages size={18} />
-          </button>
-          <button 
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </motion.button>
+
+          <motion.button 
+            whileHover={{ scale: 1.05, backgroundColor: "var(--accent-soft)" }}
+            whileTap={{ scale: 0.95 }}
             onClick={logout}
-            className="btn-secondary" 
-            style={{ padding: "10px", borderRadius: 10, color: "#EF4444" }}
+            style={{ width: 44, minWidth: 44, height: 44, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-card)", color: "#EA4335", border: "1px solid rgba(234, 67, 53, 0.4)", cursor: "pointer", boxShadow: "var(--shadow-sm)" }}
           >
             <LogOut size={18} />
-          </button>
+          </motion.button>
         </div>
       </div>
     </aside>

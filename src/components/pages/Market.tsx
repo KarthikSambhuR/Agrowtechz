@@ -7,6 +7,7 @@ import {
 import { 
   TrendingUp, TrendingDown, ArrowRight, Globe, Package
 } from "lucide-react";
+import { tr } from "@/lib/translations";
 
 const MARKET_DATA = [
   { crop: "Pineapple", price: 4290, trend: 12.5, unit: " /Quintal", flag: "up" },
@@ -32,19 +33,19 @@ export default function Market() {
       <div className="reveal" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
            <h1 style={{ fontSize: 32, fontWeight: 900, color: "#1E293B", letterSpacing: "-0.04em" }}>
-              GLOBAL TRADE TERMINAL
+              {tr("MARKET PRICES", language)}
            </h1>
-           <p style={{ color: "var(--text-dim)", marginTop: 4 }}>Live agricultural commodity analytics</p>
+           <p style={{ color: "var(--text-dim)", marginTop: 4 }}>{tr("Current and future crop prices", language)}</p>
         </div>
         <div style={{ display: "flex", gap: 12 }}>
-           <button className="btn-secondary">Export Data</button>
-           <button className="btn-primary">View Market Trends</button>
+           <button className="btn-secondary">{tr("Export Data", language)}</button>
+           <button className="btn-primary">{tr("View Market Trends", language)}</button>
         </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 24 }}>
          <div className="premium-card reveal" style={{ animationDelay: "0.1s" }}>
-            <div className="text-label" style={{ marginBottom: 24 }}>Cross-Commodity Pricing Index</div>
+            <div className="text-label" style={{ marginBottom: 24 }}>{tr("Current Crop Prices", language)}</div>
             <div style={{ height: 300 }}>
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={BAR_DATA} barSize={40}>
@@ -64,7 +65,7 @@ export default function Market() {
          </div>
 
          <div className="premium-card reveal" style={{ animationDelay: "0.2s", display: "flex", flexDirection: "column", gap: 20 }}>
-            <div className="text-label" style={{ marginBottom: 4 }}>Price Volatility List</div>
+            <div className="text-label" style={{ marginBottom: 4 }}>{tr("Price Changes", language)}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                {MARKET_DATA.slice(0,5).map(item => (
                   <div key={item.crop} style={{ 
@@ -77,7 +78,7 @@ export default function Market() {
                            {item.flag === 'up' ? <TrendingUp size={16} color="var(--accent-primary)" /> : <TrendingDown size={16} color="#F87171" />}
                         </div>
                         <div>
-                           <div style={{ fontSize: 13, fontWeight: 800 }}>{item.crop}</div>
+                           <div style={{ fontSize: 13, fontWeight: 800 }}>{tr(item.crop, language)}</div>
                            <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 700 }}>₹{item.price.toLocaleString("en-IN")}</div>
                         </div>
                      </div>
@@ -101,18 +102,18 @@ export default function Market() {
         }}>
            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div>
-                 <div className="text-label" style={{ color: "var(--accent-secondary)" }}>Impact Analysis: {language === 'ml' ? crop.labelMl : crop.label}</div>
-                 <h2 className="outfit" style={{ fontSize: 24, fontWeight: 900 }}>Production Potential</h2>
+                 <div className="text-label" style={{ color: "var(--accent-secondary)" }}>{tr("Market Overview:", language)} {language === 'ml' ? crop.labelMl : crop.label}</div>
+                 <h2 className="outfit" style={{ fontSize: 24, fontWeight: 900 }}>{tr("Production Income", language)}</h2>
               </div>
-              <button className="btn-primary">Trade Strategy <ArrowRight size={16} /></button>
+              <button className="btn-primary">{tr("View Plan", language)} <ArrowRight size={16} /></button>
            </div>
            
            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
               {[
-                { label: "SPOT RATE", val: `₹${crop.basePrice.toLocaleString("en-IN")}`, icon: <Globe size={18} /> },
-                { label: "EST. HARVEST", val: `${(activePlot.area * crop.baseYield).toFixed(1)} Tons`, icon: <Package size={18} /> },
-                { label: "MARKET ALPHA", val: `+12.4%`, icon: <TrendingUp size={18} /> },
-                { label: "CONFIDENCE", val: "94.2%", icon: <ArrowRight size={18} /> },
+                { label: tr("CURRENT PRICE", language), val: `₹${crop.basePrice.toLocaleString("en-IN")}`, icon: <Globe size={18} /> },
+                { label: tr("EST. HARVEST", language), val: `${(activePlot.area * crop.baseYield).toFixed(1)} ${tr("Tons", language)}`, icon: <Package size={18} /> },
+                { label: tr("PRICE TREND", language), val: `+12.4%`, icon: <TrendingUp size={18} /> },
+                { label: tr("RELIABILITY", language), val: "94.2%", icon: <ArrowRight size={18} /> },
               ].map((item, i) => (
                 <div key={i} style={{ padding: 16, background: "#FFF", borderRadius: 12, border: "1px solid var(--border-line)" }}>
                    <div style={{ fontSize: 10, fontWeight: 800, color: "var(--text-ghost)", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>

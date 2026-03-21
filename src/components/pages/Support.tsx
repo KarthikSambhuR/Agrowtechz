@@ -1,29 +1,30 @@
 "use client";
 import { useApp } from "@/context/AppContext";
 import { MessageSquare, Phone, ShieldAlert, ChevronRight, HelpCircle } from "lucide-react";
+import { tr } from "@/lib/translations";
 
 export default function Support() {
-  useApp(); // consume context (no state needed currently)
+  const { language } = useApp();
 
   return (
     <div style={{ padding: "40px", display: "flex", flexDirection: "column", gap: 32, overflowY: "auto", height: "100%" }}>
       <div className="reveal">
          <h1 style={{ fontSize: 32, fontWeight: 900, color: "#1E293B", letterSpacing: "-0.04em" }}>
-            CENTRAL SUPPORT NODE
+            {tr("FARMER SUPPORT", language)}
          </h1>
-         <p style={{ color: "var(--text-dim)", marginTop: 4 }}>Access technical assistance and safety protocols</p>
+         <p style={{ color: "var(--text-dim)", marginTop: 4 }}>{tr("Get help and talk to experts", language)}</p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
          <div className="premium-card reveal" style={{ 
            animationDelay: "0.1s", display: "flex", flexDirection: "column", gap: 20
          }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800 }}>Direct Channels</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800 }}>{tr("Contact Us", language)}</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                {[
-                 { icon: <MessageSquare size={20} />, label: "Live Support Chat", val: "Online Now", color: "var(--accent-primary)" },
-                 { icon: <Phone size={20} />, label: "Emergency Agri-Line", val: "Available 24/7", color: "var(--accent-secondary)" },
-                 { icon: <ShieldAlert size={20} />, label: "Safety Protocol Desk", val: "Protocol Hub", color: "#F87171" },
+                 { icon: <MessageSquare size={20} />, label: tr("Chat with Expert", language), val: tr("Online Now", language), color: "var(--accent-primary)" },
+                 { icon: <Phone size={20} />, label: tr("Call Helpline", language), val: tr("Available 24/7", language), color: "var(--accent-secondary)" },
+                 { icon: <ShieldAlert size={20} />, label: tr("Report Pest/Disease", language), val: tr("Fast Response", language), color: "#F87171" },
                ].map((item, i) => (
                  <div key={i} style={{ 
                    display: "flex", justifyContent: "space-between", alignItems: "center", 
@@ -44,13 +45,13 @@ export default function Support() {
          </div>
 
          <div className="premium-card reveal" style={{ animationDelay: "0.2s" }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 20 }}>Knowledge Base</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 20 }}>{tr("Common Questions", language)}</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                {[
-                 "How to calibrate N2O sensors manually?",
-                 "Optimizing water usage for rubber trees",
-                 "Understanding harvest readiness prediction",
-                 "Securing your command node access",
+                 tr("How much water does my crop need?", language),
+                 tr("When is the best time to add fertilizer?", language),
+                 tr("How to check if the crop is ready for harvest?", language),
+                 tr("Understanding local market prices.", language),
                ].map((q, i) => (
                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -74,9 +75,9 @@ export default function Support() {
         alignItems: "center"
       }}>
          <div>
-            <h2 style={{ fontSize: 28, fontWeight: 900, marginBottom: 12 }}>Need On-Site Analysis?</h2>
+            <h2 style={{ fontSize: 28, fontWeight: 900, marginBottom: 12 }}>{tr("Need an Expert Visit?", language)}</h2>
             <p style={{ fontSize: 16, color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>
-              Request a physical soil health audit and drone survey for your plots.
+              {tr("Request an agronomist to visit your farm and test your soil.", language)}
             </p>
          </div>
          <button style={{ 
@@ -84,7 +85,7 @@ export default function Support() {
            border: "none", fontWeight: 900, fontSize: 16, cursor: "pointer",
            boxShadow: "0 10px 20px rgba(0,0,0,0.1)"
          }}>
-           BOOK INSPECTION
+           {tr("BOOK VISIT", language)}
          </button>
       </div>
     </div>
