@@ -2,7 +2,7 @@
 import { useApp } from "@/context/AppContext";
 import { tr } from "@/lib/translations";
 import { 
-  LayoutDashboard, Map, BarChart3, Store, BookOpen, LifeBuoy, Sprout, LogOut, Moon, Sun, ShoppingBag, BookMarked, Leaf, Cloud
+  LayoutDashboard, Map, BarChart3, Store, BookOpen, LifeBuoy, Sprout, LogOut, Moon, Sun, ShoppingBag, BookMarked, Leaf, Cloud, Sparkles
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -13,6 +13,7 @@ export default function Sidebar() {
     { id: "dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { id: "fields", icon: <Map size={20} />, label: "My Fields" },
     { id: "analytics", icon: <BarChart3 size={20} />, label: "Analytics" },
+    { id: "recommendations", icon: <Sparkles size={20} />, label: "AI Advisor", highlight: true },
     { id: "market", icon: <ShoppingBag size={20} />, label: "Market" },
     { id: "diary", icon: <BookMarked size={20} />, label: "Diary" },
     { id: "support", icon: <LifeBuoy size={20} />, label: "Support" },
@@ -54,6 +55,7 @@ export default function Sidebar() {
       <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
         {NAV_ITEMS.map((item) => {
           const isActive = activePage === item.id;
+          const isHighlight = (item as any).highlight;
           return (
             <motion.div 
               whileHover={{ x: 4 }}
@@ -61,7 +63,14 @@ export default function Sidebar() {
               key={item.id}
               className={`side-link ${isActive ? 'active' : ''}`}
               onClick={() => setActivePage(item.id as any)}
-              style={{ position: "relative" }}
+              style={{
+                position: "relative",
+                ...(isHighlight && !isActive ? {
+                  background: "linear-gradient(90deg, rgba(0,166,126,0.08), rgba(0,166,126,0.04))",
+                  border: "1px solid rgba(0,166,126,0.2)",
+                  borderRadius: 100,
+                } : {}),
+              }}
             >
               {isActive && (
                 <motion.div
@@ -78,6 +87,15 @@ export default function Sidebar() {
               )}
               {item.icon}
               <span style={{ fontSize: 14 }}>{tr(item.id, language)}</span>
+              {isHighlight && !isActive && (
+                <span style={{
+                  marginLeft: "auto",
+                  fontSize: 9, fontWeight: 900, letterSpacing: "0.06em",
+                  padding: "2px 7px", borderRadius: 100,
+                  background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))",
+                  color: "#FFF",
+                }}>AI</span>
+              )}
             </motion.div>
           );
         })}

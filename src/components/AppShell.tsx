@@ -11,6 +11,7 @@ import Support from "@/components/pages/Support";
 import Onboarding from "@/components/pages/Onboarding";
 import Login from "@/components/pages/Login";
 import Settings from "@/components/pages/Settings";
+import Recommendations from "@/components/pages/Recommendations";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DoodleLeaf, DoodleWheat, DoodleDrop, DoodleSun, DoodleStar, DoodleLine } from "@/components/Doodles";
@@ -58,6 +59,7 @@ function PageContent({ activePage }: { activePage: string }) {
     dashboard: <Dashboard />,
     analytics: <Analytics />,
     fields: <Fields />,
+    recommendations: <Recommendations />,
     market: <Market />,
     diary: <Diary />,
     support: <Support />,

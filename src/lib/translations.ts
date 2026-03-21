@@ -11,6 +11,7 @@ export const t: Translations = {
   diary: { en: "Diary", ml: "ഡയറി" },
   support: { en: "Support", ml: "പിന്തുണ" },
   analytics: { en: "Analytics", ml: "വിശകലനം" },
+  recommendations: { en: "AI Advisor", ml: "AI ഉപദേഷ്ടാവ്" },
   
   // Analytics Additions
   "FARM INSIGHTS": { en: "Farm Insights", ml: "ഫാം സ്ഥിതിവിവരക്കണക്കുകൾ" },
