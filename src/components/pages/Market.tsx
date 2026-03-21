@@ -32,7 +32,7 @@ export default function Market() {
     <div style={{ padding: "40px", display: "flex", flexDirection: "column", gap: 32, overflowY: "auto", height: "100%" }}>
       <div className="reveal" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-           <h1 style={{ fontSize: 32, fontWeight: 900, color: "#1E293B", letterSpacing: "-0.04em" }}>
+           <h1 style={{ fontSize: 32, fontWeight: 900, color: "var(--text-main)", letterSpacing: "-0.04em" }}>
               {tr("MARKET PRICES", language)}
            </h1>
            <p style={{ color: "var(--text-dim)", marginTop: 4 }}>{tr("Current and future crop prices", language)}</p>
