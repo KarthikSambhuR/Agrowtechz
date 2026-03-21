@@ -1,0 +1,111 @@
+"use client";
+import { useApp } from "@/context/AppContext";
+import { BookOpen, Plus, Search, Calendar, ShieldCheck, Zap, Droplets } from "lucide-react";
+
+interface DiaryEntry {
+  id: string;
+  type: "irrigation" | "fertilizer" | "harvest" | "observation";
+  title: string;
+  message: string;
+  timestamp: Date;
+  plotId: string;
+}
+
+const ENTRIES: DiaryEntry[] = [
+  { id: "e1", type: "irrigation", title: "Automated Irrig Cycle 104", message: "Zone 1 & 2 fully saturated. Standard cycle completed in 45 mins. 450L used.", timestamp: new Date(Date.now() - 3600000), plotId: "p1" },
+  { id: "e2", type: "fertilizer", title: "NPK Calibration applied", message: "Added 2.4kg of Potassium-rich foliar spray to pineapple clusters.", timestamp: new Date(Date.now() - 86400000), plotId: "p1" },
+  { id: "e3", type: "observation", title: "Canopy Density Shift", message: "Growth velocity increased by 14% after recent rain sequence.", timestamp: new Date(Date.now() - 172800000), plotId: "p1" },
+];
+
+export default function Diary() {
+  const { activePlot } = useApp();
+
+  return (
+    <div style={{ padding: "40px", display: "flex", flexDirection: "column", gap: 32, overflowY: "auto", height: "100%" }}>
+      <div className="reveal" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+           <h1 style={{ fontSize: 32, fontWeight: 900, color: "#1E293B", letterSpacing: "-0.04em" }}>
+              COMMAND LOGS
+           </h1>
+           <p style={{ color: "var(--text-dim)", marginTop: 4 }}>Persistent history for {activePlot?.name}</p>
+        </div>
+        <div style={{ display: "flex", gap: 12 }}>
+           <button className="btn-secondary">Export Log</button>
+           <button className="btn-primary">
+              <Plus size={18} /> New Entry
+           </button>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24 }}>
+         <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ position: "relative", marginBottom: 16 }}>
+               <Search size={18} color="var(--text-ghost)" style={{ position: "absolute", left: 16, top: 14 }} />
+               <input 
+                 type="text" 
+                 placeholder="Search logs..." 
+                 className="premium-card"
+                 style={{ width: "100%", padding: "14px 16px 14px 48px", outline: "none", borderRadius: 14 }}
+               />
+            </div>
+
+            {ENTRIES.map((entry, i) => (
+               <div key={entry.id} className="premium-card reveal" style={{ 
+                 animationDelay: `${0.1 + i*0.1}s`,
+                 display: "flex", gap: 20
+               }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 14,
+                    background: entry.type === 'irrigation' ? 'rgba(0, 166, 126, 0.1)' : 'rgba(0,0,0,0.03)',
+                    color: entry.type === 'irrigation' ? 'var(--accent-primary)' : 'var(--text-dim)',
+                    display: "flex", alignItems: "center", justifyContent: "center"
+                  }}>
+                     {entry.type === 'irrigation' ? <Droplets size={24} /> : <BookOpen size={24} />}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <div style={{ fontSize: 16, fontWeight: 800 }}>{entry.title}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-ghost)", fontWeight: 700 }}>{entry.timestamp.toLocaleDateString()}</div>
+                     </div>
+                     <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.5 }}>{entry.message}</p>
+                     
+                     <div style={{ 
+                       marginTop: 16, display: "flex", gap: 12, 
+                       paddingTop: 16, borderTop: "1px solid var(--border-line)"
+                     }}>
+                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                           <Calendar size={12} color="var(--text-ghost)" />
+                           <span style={{ fontSize: 10, fontWeight: 800, color: "var(--text-ghost)", textTransform: "uppercase" }}>SYNC SECURE</span>
+                        </div>
+                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                           <ShieldCheck size={12} color="var(--accent-secondary)" />
+                           <span style={{ fontSize: 10, fontWeight: 800, color: "var(--accent-secondary)", textTransform: "uppercase" }}>VERIFIED</span>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            ))}
+         </div>
+
+         <div className="reveal" style={{ animationDelay: "0.2s" }}>
+            <div className="premium-card" style={{ padding: 24, textAlign: "center", background: "var(--bg-surface)" }}>
+                <div style={{ 
+                  width: 64, height: 64, borderRadius: 20, 
+                  background: "#FFF", margin: "0 auto 20px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "var(--accent-primary)", boxShadow: "var(--shadow-md)"
+                }}>
+                   <Zap size={32} />
+                </div>
+                <div className="text-label" style={{ color: "var(--accent-primary)" }}>AI Synthesis Node</div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, margin: "12px 0 8px" }}>Weekly Summary</h3>
+                <p style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 24 }}>
+                  Automated analysis suggests 11% growth improvement over the last 7-day session. No biological threats detected.
+                </p>
+                <button className="btn-secondary" style={{ width: "100%", borderRadius: 12 }}>RE-ANALYZE NODE</button>
+            </div>
+         </div>
+      </div>
+    </div>
+  );
+}
