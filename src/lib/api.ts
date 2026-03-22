@@ -20,6 +20,8 @@ export interface RecommendationRequest {
   soil_ph?: number | null;
   soil_health?: number | null;
   days_planted?: number;
+  plant_count?: number;
+  daily_action?: string;
   language?: string;
 }
 

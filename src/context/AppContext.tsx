@@ -16,6 +16,7 @@ export interface Plot {
   coordinates: [number, number][];
   soilPH: number;
   soilHealth: number; // 0-100
+  plantCount?: number;
 }
 
 export interface SensorData {
@@ -351,8 +352,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (storedAuth) setIsAuthenticated(storedAuth === "true");
       if (storedTheme) {
         setTheme(storedTheme);
-      } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        setTheme("dark");
+      } else {
+        setTheme("light");
       }
     } catch (e) {
       console.error("Error reading localStorage", e);

@@ -1,7 +1,10 @@
 """
-Open-Meteo client — fetches current weather + soil moisture/temperature.
+Open-Meteo client - fetches current weather + soil moisture/temperature.
 No API key required.
+
+Uses asyncio.to_thread + sync httpx to avoid Windows ProactorEventLoop DNS issues.
 """
+import asyncio
 import httpx
 from models import WeatherData
 
@@ -34,7 +37,7 @@ def _first(lst: list) -> float | None:
     return None
 
 
-async def fetch_weather(lat: float, lng: float) -> WeatherData:
+def _fetch_weather_sync(lat: float, lng: float) -> dict:
     params = {
         "latitude": lat,
         "longitude": lng,
@@ -43,7 +46,13 @@ async def fetch_weather(lat: float, lng: float) -> WeatherData:
         "forecast_days": 1,
         "timezone": "auto",
     }
+    with httpx.Client(timeout=15.0) as client:
+        resp = client.get(_BASE, params=params)
+        resp.raise_for_status()
+        return resp.json()
 
+
+async def fetch_weather(lat: float, lng: float) -> WeatherData:
     result: dict[str, float | None] = {
         "temperature_2m": None,
         "precipitation_sum": None,
@@ -60,10 +69,7 @@ async def fetch_weather(lat: float, lng: float) -> WeatherData:
     }
 
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.get(_BASE, params=params)
-            resp.raise_for_status()
-            data = resp.json()
+        data = await asyncio.to_thread(_fetch_weather_sync, lat, lng)
 
         daily = data.get("daily", {})
         hourly = data.get("hourly", {})

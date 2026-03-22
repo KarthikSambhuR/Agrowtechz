@@ -48,10 +48,12 @@ export default function Analytics() {
                         <stop offset="95%" stopColor="var(--accent-primary)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-line)" vertical={false} />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-ghost)" }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-line)" vertical={false} opacity={0.3} />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-ghost)", fontWeight: 600 }} />
                     <Tooltip 
-                      contentStyle={{ background: "#FFF", border: "1px solid var(--border-line)", borderRadius: 10 }}
+                      contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border-line)", borderRadius: 12, boxShadow: "var(--shadow-md)" }}
+                      labelStyle={{ color: "var(--text-main)", fontWeight: 800, fontSize: 13 }}
+                      itemStyle={{ color: "var(--accent-primary)", fontWeight: 700, fontSize: 12 }}
                     />
                     <Area type="monotone" dataKey="price" stroke="var(--accent-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorPrice)" />
                  </AreaChart>
@@ -59,56 +61,59 @@ export default function Analytics() {
            </div>
         </div>
 
-        <div className="premium-card reveal" style={{ animationDelay: "0.2s", display: "flex", flexDirection: "column", gap: 24 }}>
+        <div className="premium-card reveal" style={{ animationDelay: "0.2s", display: "flex", flexDirection: "column" }}>
            <div>
-              <div className="text-label">{tr("Time to Harvest", language)}</div>
+              <div className="text-label" style={{ color: "var(--text-ghost)", fontSize: 11, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>{tr("Time to Harvest", language)}</div>
               <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
-                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--accent-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent-primary)" }}>
+                 <div style={{ width: 48, height: 48, borderRadius: 14, background: "var(--bg-surface)", border: "1px solid var(--border-line)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent-primary)" }}>
                     <Timer size={24} />
                  </div>
-                 <div className="text-value" style={{ fontSize: 24 }}>{daysToHarvest} <span style={{ fontSize: 12, color: "var(--text-ghost)" }}>{tr("DAYS LEFT", language)}</span></div>
+                 <div className="text-value" style={{ fontSize: 28, fontWeight: 900, color: "var(--text-main)", letterSpacing: "-0.03em" }}>{daysToHarvest} <span style={{ fontSize: 12, color: "var(--text-ghost)", letterSpacing: "0.05em" }}>{tr("DAYS LEFT", language)}</span></div>
               </div>
            </div>
 
-           <div>
-              <div className="text-label">{tr("Crop Progress", language)}</div>
-              <div style={{ height: 8, background: "var(--bg-surface)", borderRadius: 4, overflow: "hidden", marginTop: 12 }}>
-                 <div style={{ width: `${(daysPlanted/totalDays)*100}%`, height: "100%", background: "var(--accent-primary)" }} />
+           <div style={{ marginTop: 24 }}>
+              <div className="text-label" style={{ color: "var(--text-ghost)", fontSize: 11, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>{tr("Crop Progress", language)}</div>
+              <div style={{ height: 10, background: "var(--bg-surface)", border: "1px solid var(--border-line)", borderRadius: 100, overflow: "hidden", marginTop: 12 }}>
+                 <div style={{ width: `${Math.min(100, (daysPlanted/totalDays)*100)}%`, height: "100%", background: "var(--accent-primary)", borderRadius: 100 }} />
               </div>
            </div>
 
-           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div style={{ padding: 16, borderRadius: 12, background: "var(--bg-surface)" }}>
-                 <div className="text-label" style={{ fontSize: 9 }}>{tr("HEALTH", language)}</div>
-                 <div style={{ fontSize: 16, fontWeight: 800 }}>{tr("Optimal", language)}</div>
+           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: "auto" }}>
+              <div style={{ padding: 16, borderRadius: 14, background: "var(--bg-surface)", border: "1px solid var(--border-line)" }}>
+                 <div className="text-label" style={{ fontSize: 10, fontWeight: 800, color: "var(--text-ghost)", textTransform: "uppercase" }}>{tr("HEALTH", language)}</div>
+                 <div style={{ fontSize: 18, fontWeight: 800, color: "var(--accent-primary)", marginTop: 4 }}>{tr("Optimal", language)}</div>
               </div>
-              <div style={{ padding: 16, borderRadius: 12, background: "var(--bg-surface)" }}>
-                 <div className="text-label" style={{ fontSize: 9 }}>{tr("STABILITY", language)}</div>
-                 <div style={{ fontSize: 16, fontWeight: 800 }}>{tr("High", language)}</div>
+              <div style={{ padding: 16, borderRadius: 14, background: "var(--bg-surface)", border: "1px solid var(--border-line)" }}>
+                 <div className="text-label" style={{ fontSize: 10, fontWeight: 800, color: "var(--text-ghost)", textTransform: "uppercase" }}>{tr("STABILITY", language)}</div>
+                 <div style={{ fontSize: 18, fontWeight: 800, color: "var(--accent-secondary)", marginTop: 4 }}>{tr("High", language)}</div>
               </div>
            </div>
         </div>
       </div>
 
       <div className="reveal" style={{ animationDelay: "0.3s" }}>
-         <div className="text-label" style={{ marginBottom: 16 }}>{tr("Growth Stages", language)}</div>
+         <div className="text-label" style={{ color: "var(--text-ghost)", fontSize: 12, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 16 }}>{tr("Growth Stages", language)}</div>
          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }}>
             {crop.stages.map((stage, i) => {
                const isCurrent = i === currentStageIdx;
                const isDone = i < currentStageIdx;
                return (
                   <div key={i} className="premium-card" style={{ 
-                    padding: 16, 
+                    padding: 20, 
+                    borderRadius: 20,
                     borderColor: isCurrent ? "var(--accent-primary)" : "var(--border-line)",
-                    background: isCurrent ? "var(--accent-soft)" : "#FFF",
-                    opacity: isDone ? 0.6 : 1
+                    background: isCurrent ? "rgba(16, 185, 129, 0.05)" : "var(--bg-card)",
+                    opacity: isDone ? 0.4 : 1,
+                    boxShadow: isCurrent ? "0 4px 20px rgba(16, 185, 129, 0.1)" : "none",
+                    borderWidth: isCurrent ? 2 : 1
                   }}>
-                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                        <span style={{ fontSize: 10, fontWeight: 900, color: "var(--text-ghost)" }}>{tr("STAGE", language)} 0{i+1}</span>
-                        {isDone && <ShieldCheck size={14} color="var(--accent-secondary)" />}
+                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                        <span style={{ fontSize: 10, fontWeight: 900, color: isCurrent ? "var(--accent-primary)" : "var(--text-ghost)", letterSpacing: "1px" }}>{tr("STAGE", language)} 0{i+1}</span>
+                        {isDone && <ShieldCheck size={16} color="var(--accent-primary)" />}
                      </div>
-                     <div style={{ fontSize: 16, fontWeight: 800 }}>{tr(stage.name, language)}</div>
-                     <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 4 }}>{tr("Day", language)} {stage.startDay}-{stage.endDay}</div>
+                     <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text-main)" }}>{tr(stage.name, language)}</div>
+                     <div style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, marginTop: 6 }}>{tr("Day", language)} {stage.startDay}-{stage.endDay}</div>
                   </div>
                );
             })}

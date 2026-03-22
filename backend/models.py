@@ -17,6 +17,8 @@ class RecommendationRequest(BaseModel):
     soil_ph: float | None = None
     soil_health: float | None = None
     days_planted: int | None = None
+    plant_count: int | None = None
+    daily_action: str | None = None
     language: str = "en"
 
 

@@ -21,11 +21,11 @@ const GlassCard = ({ children, style = {} }: any) => (
     transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
     style={{
       width: "100%", maxWidth: 640,
-      background: "rgba(255, 255, 255, 0.65)",
+      background: "var(--bg-glass)",
       backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
       borderRadius: 32, padding: 36,
-      boxShadow: "0 40px 80px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.8), inset 1px 0 0 rgba(255,255,255,0.4)",
-      border: "1px solid rgba(255, 255, 255, 0.5)",
+      boxShadow: "var(--shadow-lg)",
+      border: "1px solid var(--border-line)",
       zIndex: 10, ...style
     }}
   >
@@ -49,6 +49,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [plotArea, setPlotArea] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [activeTool, setActiveTool] = useState<DrawingTool>("polygon");
+  const [plantCount, setPlantCount] = useState<string>("");
 
   const plotReady = plotPoints.length >= 3;
 
@@ -71,6 +72,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               coordinates: plotPoints.map(pt => [pt.lat, pt.lng] as [number, number]),
               soilPH: parseFloat((6 + Math.random()).toFixed(1)),
               soilHealth: Math.floor(80 + Math.random() * 20),
+              plantCount: plantCount ? parseInt(plantCount) : undefined,
             });
           }
           setOnboarded(true);
@@ -109,7 +111,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {step === "crop" && (
           <GlassCard key="crop" style={{ maxWidth: 800 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 14, background: "var(--accent-primary)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 30px rgba(15, 157, 88, 0.3)" }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: "var(--accent-primary)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 30px var(--accent-glow)" }}>
                 <Leaf size={24} color="#FFF" />
               </div>
               <div>
@@ -128,10 +130,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     style={{
                       position: "relative", cursor: "pointer",
-                      border: `1px solid ${isSelected ? "rgba(15,157,88,0.5)" : "rgba(0,0,0,0.05)"}`,
-                      background: isSelected ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.6)",
+                      border: `1px solid ${isSelected ? "var(--accent-primary)" : "var(--border-line)"}`,
+                      background: isSelected ? "var(--bg-card)" : "var(--bg-glass)",
                       padding: "8px", borderRadius: 20,
-                      boxShadow: isSelected ? "0 8px 24px rgba(15, 157, 88, 0.2), inset 0 0 0 2px var(--accent-primary)" : "none",
+                      boxShadow: isSelected ? "0 8px 24px var(--accent-glow), inset 0 0 0 2px var(--accent-primary)" : "none",
                       display: "flex", flexDirection: "column", gap: 12, overflow: "hidden"
                     }}
                   >
@@ -163,7 +165,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               })}
             </div>
 
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={!selected} onClick={() => setStep("map")} style={{ width: "100%", padding: 18, background: "var(--text-main)", color: "#FFF", borderRadius: 16, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: selected ? 1 : 0.5, boxShadow: selected ? "0 12px 24px -6px rgba(0, 0, 0, 0.4)" : "none" }}>
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={!selected} onClick={() => setStep("map")} style={{ width: "100%", padding: 18, background: "var(--accent-primary)", color: "#FFF", borderRadius: 16, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: selected ? 1 : 0.5, boxShadow: selected ? "var(--shadow-md)" : "none" }}>
               {tr("Continue to Map", language)} <ArrowRight size={18} />
             </motion.button>
           </GlassCard>
@@ -173,10 +175,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           <motion.div key="map" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ position: "absolute", bottom: 32, left: 32, right: "auto", zIndex: 10, display: "flex", flexDirection: "column", gap: 12 }}>
             {/* Info Card */}
             <div style={{
-              background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)",
+              background: "var(--bg-glass)", backdropFilter: "blur(20px)",
               borderRadius: 24, padding: "24px 28px",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.1)",
-              border: "1px solid rgba(255,255,255,0.6)",
+              boxShadow: "var(--shadow-premium)",
+              border: "1px solid var(--border-line)",
               width: 380,
             }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -186,15 +188,15 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 </div>
                 <button
                   onClick={() => setStep("crop")}
-                  style={{ background: "rgba(0,0,0,0.04)", border: "none", width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-main)", cursor: "pointer" }}
+                  style={{ background: "var(--accent-soft)", border: "none", width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-main)", cursor: "pointer" }}
                 >
                   <ArrowLeft size={16} />
                 </button>
               </div>
 
-              <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+              <div style={{ display: "flex", gap: 12, marginBottom: selected ? 12 : 20 }}>
                 {selected && (
-                  <div style={{ flex: 1, padding: "14px", background: "rgba(255,255,255,0.7)", borderRadius: 14, border: "1px solid rgba(0,0,0,0.05)" }}>
+                  <div style={{ flex: 1, padding: "14px", background: "var(--bg-card)", borderRadius: 14, border: "1px solid var(--border-line)" }}>
                     <div style={{ fontSize: 10, fontWeight: 800, color: "var(--text-ghost)", textTransform: "uppercase" }}>{tr("Crop", language)}</div>
                     <div style={{ fontSize: 15, fontWeight: 800, display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
                       <div style={{ width: 24, height: 24, position: "relative", borderRadius: 6, overflow: "hidden" }}>
@@ -204,17 +206,35 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     </div>
                   </div>
                 )}
-                <div style={{ flex: 1, padding: "14px", background: "rgba(255,255,255,0.7)", borderRadius: 14, border: "1px solid rgba(0,0,0,0.05)" }}>
+                <div style={{ flex: 1, padding: "14px", background: "var(--bg-card)", borderRadius: 14, border: "1px solid var(--border-line)" }}>
                   <div style={{ fontSize: 10, fontWeight: 800, color: "var(--text-ghost)", textTransform: "uppercase" }}>{tr("Area", language)}</div>
                   <div style={{ fontSize: 17, fontWeight: 900, color: plotReady ? "var(--accent-primary)" : "var(--text-main)", marginTop: 2 }}>{plotArea !== null ? `${plotArea.toFixed(2)}` : "--"}<span style={{ fontSize: 12, marginLeft: 4, fontWeight: 600 }}>{tr("ac", language)}</span></div>
                 </div>
               </div>
 
+              {selected && plotReady && (
+                <div style={{ padding: "14px", background: "var(--bg-card)", borderRadius: 14, border: "1px solid var(--border-line)", marginBottom: 20 }}>
+                   <div style={{ fontSize: 10, fontWeight: 800, color: "var(--text-ghost)", textTransform: "uppercase", marginBottom: 6 }}>
+                     {tr("Number of Plants/Trees (Optional)", language)}
+                   </div>
+                   <input 
+                     type="number"
+                     placeholder={tr("e.g. 450", language)}
+                     value={plantCount}
+                     onChange={(e) => setPlantCount(e.target.value)}
+                     style={{
+                       width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid var(--border-line)",
+                       background: "var(--bg-surface)", color: "var(--text-main)", fontSize: 15, fontWeight: 600
+                     }}
+                   />
+                </div>
+              )}
+
               {!plotReady && (
                 <div style={{
                   padding: "12px 16px", borderRadius: 12,
-                  background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.15)",
-                  fontSize: 12, fontWeight: 600, color: "#92400E", marginBottom: 16,
+                  background: "var(--accent-soft)", border: "1px solid var(--border-line)",
+                  fontSize: 12, fontWeight: 600, color: "var(--text-main)", marginBottom: 16,
                   display: "flex", alignItems: "center", gap: 8,
                 }}>
                   <span>⚠️</span>
@@ -228,12 +248,12 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 disabled={!plotReady}
                 style={{
                   width: "100%", padding: 16,
-                  background: plotReady ? "var(--accent-primary)" : "rgba(0,0,0,0.06)",
+                  background: plotReady ? "var(--accent-primary)" : "var(--bg-surface)",
                   color: plotReady ? "#FFF" : "var(--text-ghost)",
                   borderRadius: 14, fontSize: 15, fontWeight: 700, border: "none",
                   cursor: plotReady ? "pointer" : "not-allowed",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  boxShadow: plotReady ? "0 8px 20px -4px rgba(15, 157, 88, 0.4)" : "none",
+                  boxShadow: plotReady ? "var(--shadow-md)" : "none",
                   transition: "all 0.25s ease",
                 }}
               >
@@ -245,14 +265,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
         {step === "analyzing" && (
           <GlassCard key="analyzing" style={{ textAlign: "center", padding: 48, maxWidth: 440 }}>
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} style={{ width: 80, height: 80, borderRadius: 24, background: "rgba(255,255,255,0.8)", margin: "0 auto 32px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 30px rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.05)" }}>
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} style={{ width: 80, height: 80, borderRadius: 24, background: "var(--bg-card)", margin: "0 auto 32px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-md)", border: "1px solid var(--border-line)" }}>
               <Globe size={40} color="var(--accent-primary)" />
             </motion.div>
 
             <div style={{ color: "var(--text-ghost)", fontSize: 12, fontWeight: 800, letterSpacing: "2px", marginBottom: 8, textTransform: "uppercase" }}>{tr("Setting up your farm", language)}</div>
             <div style={{ fontSize: 72, fontWeight: 900, color: "var(--text-main)", lineHeight: 1, letterSpacing: "-0.04em" }}>{Math.round(progress)}%</div>
 
-            <div style={{ height: 6, background: "rgba(0,0,0,0.05)", borderRadius: 100, overflow: "hidden", margin: "32px 0 32px" }}>
+            <div style={{ height: 6, background: "var(--border-line)", borderRadius: 100, overflow: "hidden", margin: "32px 0 32px" }}>
               <div style={{ width: `${progress}%`, height: "100%", background: "var(--accent-primary)", transition: "width 0.15s ease", borderRadius: 100 }} />
             </div>
 
@@ -261,7 +281,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 const done = progress >= 33 * (i + 1);
                 return (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: "center", fontSize: 14, fontWeight: 600, color: done ? "var(--text-main)" : "var(--text-ghost)", transition: "color 0.3s ease" }}>
-                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: done ? "var(--accent-primary)" : "rgba(255,255,255,0.6)", border: `2px solid ${done ? "var(--accent-primary)" : "rgba(0,0,0,0.1)"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s ease" }}>
+                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: done ? "var(--accent-primary)" : "var(--bg-card)", border: `2px solid ${done ? "var(--accent-primary)" : "var(--border-line)"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s ease" }}>
                       {done && <Check size={12} color="#FFF" strokeWidth={3} />}
                     </div>
                     {tr(label, language)}

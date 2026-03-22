@@ -13,7 +13,6 @@ export default function Sidebar() {
     { id: "dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { id: "fields", icon: <Map size={20} />, label: "My Fields" },
     { id: "analytics", icon: <BarChart3 size={20} />, label: "Analytics" },
-    { id: "recommendations", icon: <Sparkles size={20} />, label: "AI Advisor", highlight: true },
     { id: "market", icon: <ShoppingBag size={20} />, label: "Market" },
     { id: "diary", icon: <BookMarked size={20} />, label: "Diary" },
     { id: "support", icon: <LifeBuoy size={20} />, label: "Support" },
