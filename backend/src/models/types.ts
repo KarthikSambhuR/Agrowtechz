@@ -1,11 +1,3 @@
-/**
- * Agrowtechz API Client
- * ─────────────────────
- * Talks to the FastAPI backend at http://localhost:8000
- */
-
-const API_BASE = "https://agrowtechz-api.karthiksambhu123.workers.dev/api";
-
 export interface PlotCoordinate {
   lat: number;
   lng: number;
@@ -17,8 +9,8 @@ export interface RecommendationRequest {
   crop: string;
   area_acres: number;
   coordinates: PlotCoordinate[];
-  soil_ph?: number | null;
-  soil_health?: number | null;
+  soil_ph?: number;
+  soil_health?: number;
   days_planted?: number;
   plant_count?: number;
   daily_action?: string;
@@ -69,44 +61,4 @@ export interface RecommendationResponse {
   recommendations: string;
   model_used: string;
   data_sources: string[];
-}
-
-export interface ApiError {
-  message: string;
-  status: number;
-}
-
-/**
- * Fetch AI-powered recommendations for a plot from the backend.
- */
-export async function fetchRecommendations(
-  payload: RecommendationRequest
-): Promise<RecommendationResponse> {
-  const res = await fetch(`${API_BASE}/recommendations`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw Object.assign(
-      new Error(err?.detail ?? `API error ${res.status}`),
-      { status: res.status }
-    );
-  }
-
-  return res.json() as Promise<RecommendationResponse>;
-}
-
-/**
- * Health-check — returns true if backend is reachable.
- */
-export async function checkBackendHealth(): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(4000) });
-    return res.ok;
-  } catch {
-    return false;
-  }
 }
