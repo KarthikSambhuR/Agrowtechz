@@ -306,7 +306,7 @@ const DEMO_NOTIFICATIONS: Notification[] = [
 ];
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>("ml");
   const [activePage, setActivePage] = useState("dashboard");
   const [plots, setPlots] = useState<Plot[]>(DEMO_PLOTS);
   const [userPlots, setUserPlots] = useState<Plot[]>([]); // Plots created by user
@@ -381,7 +381,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const irrigationSuggestion: "water" | "skip" = nextWeatherRainfall > 70 ? "skip" : "water";
 
   const login = (email: string, pass: string) => {
-    if (email === "farmer@farmer.in" && pass === "farmer") {
+    if (email === "farmer@farmer.in" && pass === "EricGeoKarthik@YIP1stPlace") {
       setIsAuthenticated(true);
       return true;
     }
@@ -412,7 +412,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setOnboarded(false);
     setSelectedCrop(null);
     setIsAuthenticated(false);
-    setLanguage("en");
+    setLanguage("ml");
     setActivePage("dashboard");
   };
 

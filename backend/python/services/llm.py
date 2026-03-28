@@ -12,15 +12,43 @@ from models import RecommendationRequest, EnvironmentalSnapshot
 logger = logging.getLogger(__name__)
 
 
+LANGUAGE_MAP = {
+    "en": "English",
+    "as": "Assamese",
+    "bn": "Bengali",
+    "brx": "Bodo",
+    "doi": "Dogri",
+    "gu": "Gujarati",
+    "hi": "Hindi",
+    "kn": "Kannada",
+    "ks": "Kashmiri",
+    "kok": "Konkani",
+    "mai": "Maithili",
+    "ml": "Malayalam",
+    "mni": "Manipuri",
+    "mr": "Marathi",
+    "ne": "Nepali",
+    "or": "Odia",
+    "pa": "Punjabi",
+    "sa": "Sanskrit",
+    "sat": "Santali",
+    "sd": "Sindhi",
+    "ta": "Tamil",
+    "te": "Telugu",
+    "ur": "Urdu"
+}
+
+
 def _build_prompt(req: RecommendationRequest, env: EnvironmentalSnapshot) -> str:
     soil = env.soil
     weather = env.weather
+    target_language = LANGUAGE_MAP.get(req.language or "en", "English")
 
     def fmt(v, unit="", decimals=2):
         return f"{round(v, decimals)}{unit}" if v is not None else "N/A"
 
     lines = [
-        "You are an expert agronomist advisor. Analyse the following data for a farm plot and provide a structured JSON response.",
+        f"You are an expert agronomist advisor. Analyse the following data for a farm plot and provide a structured JSON response in {target_language}.",
         "",
         "## Plot Details",
         f"- Plot: {req.plot_name} (ID: {req.plot_id})",
@@ -38,23 +66,24 @@ def _build_prompt(req: RecommendationRequest, env: EnvironmentalSnapshot) -> str
         f"- Soil Moisture 0-9cm: {fmt(weather.soil_moisture_3_9cm, ' m3/m3')}",
         "",
         "## Instructions",
-        "You MUST respond ONLY with a valid JSON object. Do not include markdown code blocks like ```json."
-        "The JSON MUST have the following keys EXACTLY:",
-        '1. "title": A short, punchy heading for the dashboard card (e.g., "Rain expected tomorrow.", "Critical moisture deficit."). max 6 words.',
-        '2. "subtitle": A brief description explaining what to do (e.g., "You can skip watering to save water.", "Start irrigation immediately to prevent stress."). max 10 words. CRITICAL: If a daily action was logged (e.g., tapped rubber), acknowledge it and estimate the yield (e.g., expected sheets based on plant count).',
-        '3. "action_text": Text for the main action button (e.g., "Skip Watering", "Start Pumps", "View Alert"). max 3 words.',
-        '4. "metric_value": A relevant numeric figure to display in a badge on the right (e.g., "12%", "+5mm", "35°C").',
-        '5. "metric_label": Label for that metric (e.g., "WATER SAVED", "CURRENT DEFICIT", "AIR TEMP").',
+        f"You MUST respond ONLY with a valid JSON object. All text values MUST be in {target_language}.",
+        "Do not include markdown code blocks like ```json."
+        "The JSON MUST have the following keys EXACTLY (do not translate the keys, only the values):",
+        '1. "title": A short, punchy heading for the dashboard card. max 6 words.',
+        '2. "subtitle": A brief description explaining what to do. max 10 words. CRITICAL: If a daily action was logged, acknowledge it and estimate the yield.',
+        '3. "action_text": Text for the main action button. max 3 words.',
+        '4. "metric_value": A relevant numeric figure to display in a badge on the right.',
+        '5. "metric_label": Label for that metric (e.g., "WATER SAVED", "CURRENT DEFICIT").',
         '6. "full_report": A full, structured markdown advisory report supporting the summary above. Include standard headings: ## Summary, ## Immediate Actions, ## Advice.',
         "",
         "Response FORMAT REQUIRED:",
         "{",
-        '  "title": "...",'
-        '  "subtitle": "...",'
-        '  "action_text": "...",'
-        '  "metric_value": "...",'
-        '  "metric_label": "...",'
-        '  "full_report": "## Summary\\n...\\n## Immediate Actions\\n..."'
+        '  "title": "...",',
+        '  "subtitle": "...",',
+        '  "action_text": "...",',
+        '  "metric_value": "...",',
+        '  "metric_label": "...",',
+        '  "full_report": "## Summary\\n...\\n## Immediate Actions\\n..."',
         "}"
     ]
     return "\n".join(lines)

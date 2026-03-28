@@ -11,6 +11,33 @@ import Image from "next/image";
 
 const PlotMapLeaflet = dynamic(() => import("@/components/PlotMapLeaflet"), { ssr: false, loading: () => null });
 
+import { Language } from "@/context/AppContext";
+
+const INDIAN_LANGUAGES: { code: Language; name: string; nativeName: string }[] = [
+  { code: "en", name: "English", nativeName: "English" },
+  { code: "hi", name: "Hindi", nativeName: "हिन्दी" },
+  { code: "ml", name: "Malayalam", nativeName: "മലയാളം" },
+  { code: "ta", name: "Tamil", nativeName: "தமிழ்" },
+  { code: "te", name: "Telugu", nativeName: "తెలుగు" },
+  { code: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
+  { code: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
+  { code: "mr", name: "Marathi", nativeName: "मराठी" },
+  { code: "bn", name: "Bengali", nativeName: "বাংলা" },
+  { code: "pa", name: "Punjabi", nativeName: "ਪੰਜਾਬੀ" },
+  { code: "or", name: "Odia", nativeName: "ଓଡ଼ିଆ" },
+  { code: "as", name: "Assamese", nativeName: "অসমীয়া" },
+  { code: "ks", name: "Kashmiri", nativeName: "कॉशुर" },
+  { code: "kok", name: "Konkani", nativeName: "कोंकणी" },
+  { code: "mai", name: "Maithili", nativeName: "मैथिली" },
+  { code: "mni", name: "Manipuri", nativeName: "ꯃꯤꯇꯩꯂꯣꯟ" },
+  { code: "ne", name: "Nepali", nativeName: "नेपाली" },
+  { code: "sa", name: "Sanskrit", nativeName: "संस्कृतम्" },
+  { code: "sat", name: "Santali", nativeName: "ᱥᱟᱱᱛᱟᱲᱤ" },
+  { code: "sd", name: "Sindhi", nativeName: "سنڌي" },
+  { code: "brx", name: "Bodo", nativeName: "बड़ो" },
+  { code: "doi", name: "Dogri", nativeName: "डोगरी" },
+];
+
 const CROP_ORDER: CropType[] = ["pineapple", "rubber", "rice", "palm_oil", "coffee", "spices", "sugarcane", "tea"];
 
 const GlassCard = ({ children, style = {} }: any) => (
@@ -42,8 +69,8 @@ const BackgroundBlobs = React.memo(() => (
 ));
 
 export default function Onboarding({ onComplete }: { onComplete: () => void }) {
-  const { setSelectedCrop, setOnboarded, addPlot, language } = useApp();
-  const [step, setStep] = useState<"crop" | "map" | "analyzing">("crop");
+  const { setSelectedCrop, setOnboarded, addPlot, language, setLanguage } = useApp();
+  const [step, setStep] = useState<"language" | "crop" | "map" | "analyzing">("language");
   const [selected, setSelected] = useState<CropType | null>(null);
   const [plotPoints, setPlotPoints] = useState<PlotPoint[]>([]);
   const [plotArea, setPlotArea] = useState<number | null>(null);
@@ -108,6 +135,46 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       )}
 
       <AnimatePresence mode="wait" initial={false}>
+        {step === "language" && (
+          <GlassCard key="language" style={{ maxWidth: 700 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: "var(--accent-primary)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 10px 30px var(--accent-glow)" }}>
+                <Globe size={24} color="#FFF" />
+              </div>
+              <div>
+                <h2 style={{ fontSize: 24, fontWeight: 800, color: "var(--text-main)", letterSpacing: "-0.02em" }}>{tr("Regional Language", language)}</h2>
+                <p style={{ fontSize: 13, color: "var(--text-ghost)", fontWeight: 700, marginTop: 2, textTransform: "uppercase", letterSpacing: "1px" }}>Language Preferences</p>
+              </div>
+            </div>
+
+            <div style={{ height: "45vh", overflowY: "auto", paddingRight: 8, marginBottom: 32, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+              {INDIAN_LANGUAGES.map((lang) => {
+                const isSelected = language === lang.code;
+                return (
+                  <motion.div
+                    key={lang.code} onClick={() => setLanguage(lang.code)}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                    style={{
+                      cursor: "pointer", padding: "16px 20px", borderRadius: 16,
+                      border: `1px solid ${isSelected ? "var(--accent-primary)" : "var(--border-line)"}`,
+                      background: isSelected ? "var(--bg-card)" : "var(--bg-glass)",
+                      boxShadow: isSelected ? "0 8px 16px var(--accent-glow)" : "none",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <div style={{ fontSize: 16, fontWeight: 800, color: isSelected ? "var(--accent-primary)" : "var(--text-main)" }}>{lang.nativeName}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", marginTop: 2 }}>{lang.name}</div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep("crop")} style={{ width: "100%", padding: 18, background: "var(--accent-primary)", color: "#FFF", borderRadius: 16, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "var(--shadow-md)" }}>
+              {tr("Continue", language)} <ArrowRight size={18} />
+            </motion.button>
+          </GlassCard>
+        )}
+
         {step === "crop" && (
           <GlassCard key="crop" style={{ maxWidth: 800 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
@@ -165,9 +232,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               })}
             </div>
 
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={!selected} onClick={() => setStep("map")} style={{ width: "100%", padding: 18, background: "var(--accent-primary)", color: "#FFF", borderRadius: 16, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: selected ? 1 : 0.5, boxShadow: selected ? "var(--shadow-md)" : "none" }}>
-              {tr("Continue to Map", language)} <ArrowRight size={18} />
-            </motion.button>
+            <div style={{ display: "flex", gap: 12 }}>
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setStep("language")} style={{ flex: "0 0 60px", padding: 18, background: "var(--bg-glass)", color: "var(--text-main)", borderRadius: 16, fontSize: 15, fontWeight: 700, border: "1px solid var(--border-line)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ArrowLeft size={18} />
+              </motion.button>
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} disabled={!selected} onClick={() => setStep("map")} style={{ flex: 1, padding: 18, background: "var(--accent-primary)", color: "#FFF", borderRadius: 16, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: selected ? 1 : 0.5, boxShadow: selected ? "var(--shadow-md)" : "none" }}>
+                {tr("Continue to Map", language)} <ArrowRight size={18} />
+              </motion.button>
+            </div>
           </GlassCard>
         )}
 

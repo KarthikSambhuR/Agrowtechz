@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Login() {
   const { login, language } = useApp();
   const [email, setEmail] = useState("farmer@farmer.in");
-  const [password, setPassword] = useState("farmer");
+  const [password, setPassword] = useState("EricGeoKarthik@YIP1stPlace");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup">("signin");

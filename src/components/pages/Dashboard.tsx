@@ -163,6 +163,12 @@ export default function Dashboard() {
 
   const confirmAndRunAnalysis = useCallback(async (actionTaken?: string) => {
     if (!displayPlot || !displayPlot.coordinates || displayPlot.coordinates.length < 3) return;
+    
+    // Remember the answer immediately so we don't ask again if language changes mid-analysis
+    if (actionTaken) {
+      localStorage.setItem(`dashboard_action_${displayPlot.id}`, actionTaken);
+    }
+    
     setDailyPromptState("analyzing");
     setLoading(true);
     setError(null);
@@ -182,7 +188,7 @@ export default function Dashboard() {
         language,
       });
       setResult(data);
-      localStorage.setItem(`dashboard_ai_${displayPlot.id}`, JSON.stringify(data));
+      localStorage.setItem(`dashboard_ai_${displayPlot.id}_${language}`, JSON.stringify(data));
     } catch (e: any) {
       setError(e.message ?? "Failed to connect to backend.");
     } finally {
@@ -204,19 +210,26 @@ export default function Dashboard() {
     // reset state
     setDailyPromptState("hidden");
 
-    const cached = localStorage.getItem(`dashboard_ai_${displayPlot.id}`);
+    const cached = localStorage.getItem(`dashboard_ai_${displayPlot.id}_${language}`);
     if (cached) {
       try {
         setResult(JSON.parse(cached));
       } catch (p) {
-        localStorage.removeItem(`dashboard_ai_${displayPlot.id}`);
+        localStorage.removeItem(`dashboard_ai_${displayPlot.id}_${language}`);
         setDailyPromptState("asking");
       }
     } else {
-      setResult(null); // Clear old previous responses to prevent flash
-      setDailyPromptState("asking");
+      // Do not clear the result immediately to avoid flashing to empty state on language change
+      
+      // Auto-trigger analysis if we already have a stored action for this plot
+      const storedAction = localStorage.getItem(`dashboard_action_${displayPlot.id}`);
+      if (storedAction) {
+        confirmAndRunAnalysis(storedAction);
+      } else {
+        setDailyPromptState("asking");
+      }
     }
-  }, [displayPlot?.id]);
+  }, [displayPlot?.id, language, confirmAndRunAnalysis]);
 
   useEffect(() => {
     if (result && result.recommendations) {
@@ -360,7 +373,7 @@ export default function Dashboard() {
                   </div>
 
                   {(() => {
-                    const parts = (parsedMsg.metric_value || "").split(" ");
+                    const parts = String(parsedMsg.metric_value || "").split(" ");
                     const val = parts[0];
                     const unit = parts.slice(1).join(" ");
 

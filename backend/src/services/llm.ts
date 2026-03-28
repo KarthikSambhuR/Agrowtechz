@@ -1,14 +1,41 @@
 import { EnvironmentalSnapshot, RecommendationRequest } from "../models/types";
 
+const LANGUAGE_MAP: Record<string, string> = {
+  en: "English",
+  as: "Assamese",
+  bn: "Bengali",
+  brx: "Bodo",
+  doi: "Dogri",
+  gu: "Gujarati",
+  hi: "Hindi",
+  kn: "Kannada",
+  ks: "Kashmiri",
+  kok: "Konkani",
+  mai: "Maithili",
+  ml: "Malayalam",
+  mni: "Manipuri",
+  mr: "Marathi",
+  ne: "Nepali",
+  or: "Odia",
+  pa: "Punjabi",
+  sa: "Sanskrit",
+  sat: "Santali",
+  sd: "Sindhi",
+  ta: "Tamil",
+  te: "Telugu",
+  ur: "Urdu",
+};
+
 function buildPrompt(req: RecommendationRequest, env: EnvironmentalSnapshot): string {
   const { soil, weather } = env;
+  const targetLanguage = LANGUAGE_MAP[req.language || "en"] || "English";
 
   const fmt = (v: number | null | undefined, unit: string = "", decimals: number = 2) => {
     return v !== null && v !== undefined ? `${v.toFixed(decimals)}${unit}` : "N/A";
   };
 
   const lines = [
-    "You are an expert agronomist advisor. Analyse the following data for a farm plot and provide a structured JSON response.",
+    `You are an expert agronomist advisor. Analyse the following data for a farm plot and provide a structured JSON response in ${targetLanguage}.`,
     "",
     "## Plot Details",
     `- Plot: ${req.plot_name} (ID: ${req.plot_id})`,
@@ -26,13 +53,14 @@ function buildPrompt(req: RecommendationRequest, env: EnvironmentalSnapshot): st
     `- Soil Moisture 0-9cm: ${fmt(weather.soil_moisture_3_9cm, " m3/m3")}`,
     "",
     "## Instructions",
-    "You MUST respond ONLY with a valid JSON object. Do not include markdown code blocks like ```json.",
-    "The JSON MUST have the following keys EXACTLY:",
-    '1. "title": A short, punchy heading for the dashboard card (e.g., "Rain expected tomorrow.", "Critical moisture deficit."). max 6 words.',
-    '2. "subtitle": A brief description explaining what to do (e.g., "You can skip watering to save water.", "Start irrigation immediately to prevent stress."). max 10 words. CRITICAL: If a daily action was logged (e.g., tapped rubber), acknowledge it and estimate the yield (e.g., expected sheets based on plant count).',
-    '3. "action_text": Text for the main action button (e.g., "Skip Watering", "Start Pumps", "View Alert"). max 3 words.',
-    '4. "metric_value": A relevant numeric figure to display in a badge on the right (e.g., "12%", "+5mm", "35°C").',
-    '5. "metric_label": Label for that metric (e.g., "WATER SAVED", "CURRENT DEFICIT", "AIR TEMP").',
+    `You MUST respond ONLY with a valid JSON object. All text values MUST be in ${targetLanguage}.`,
+    "Do not include markdown code blocks like ```json.",
+    "The JSON MUST have the following keys EXACTLY (do not translate the keys, only the values):",
+    '1. "title": A short, punchy heading for the dashboard card. max 6 words.',
+    '2. "subtitle": A brief description explaining what to do. max 10 words. CRITICAL: If a daily action was logged, acknowledge it and estimate the yield.',
+    '3. "action_text": Text for the main action button. max 3 words.',
+    '4. "metric_value": A relevant numeric figure to display in a badge on the right.',
+    '5. "metric_label": Label for that metric (e.g., "WATER SAVED", "CURRENT DEFICIT").',
     '6. "full_report": A full, structured markdown advisory report supporting the summary above. Include standard headings: ## Summary, ## Immediate Actions, ## Advice.',
     "",
     "Response FORMAT REQUIRED:",
@@ -47,6 +75,7 @@ function buildPrompt(req: RecommendationRequest, env: EnvironmentalSnapshot): st
   ];
   return lines.join("\n");
 }
+
 
 export async function fetchRecommendations(
   req: RecommendationRequest,
