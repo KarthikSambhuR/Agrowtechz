@@ -1,10 +1,10 @@
 /**
  * Agrowtechz API Client
  * ─────────────────────
- * Talks to the FastAPI backend at http://localhost:8000
+ * Talks to the FastAPI backend at` http://localhost:8000
  */
 
-const API_BASE = "http://127.0.0.1:8787/api";
+const API_BASE = "https://agrowtechz-api.karthiksambhu123.workers.dev/api";
 
 export interface PlotCoordinate {
   lat: number;
