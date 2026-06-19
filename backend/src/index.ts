@@ -13,9 +13,19 @@ const app = new Hono<{
 
 // CORS middleware
 app.use("*", async (c, next) => {
-  const allowed = c.env.CORS_ORIGINS?.split(",").map((o) => o.trim()) || ["*"];
+  const allowed = c.env.CORS_ORIGINS?.split(",").map((o) => o.trim()) || [];
   const corsHandler = cors({
-    origin: allowed,
+    origin: (origin) => {
+      if (!origin) return "*";
+      if (
+        allowed.includes(origin) ||
+        origin.startsWith("http://localhost:") ||
+        origin.startsWith("http://127.0.0.1:")
+      ) {
+        return origin;
+      }
+      return allowed.length > 0 ? allowed[0] : "*";
+    },
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     exposeHeaders: ["Content-Length"],

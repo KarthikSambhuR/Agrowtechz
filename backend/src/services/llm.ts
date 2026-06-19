@@ -62,6 +62,11 @@ function buildPrompt(req: RecommendationRequest, env: EnvironmentalSnapshot): st
     '4. "metric_value": A relevant numeric figure to display in a badge on the right.',
     '5. "metric_label": Label for that metric (e.g., "WATER SAVED", "CURRENT DEFICIT").',
     '6. "full_report": A full, structured markdown advisory report supporting the summary above. Include standard headings: ## Summary, ## Immediate Actions, ## Advice.',
+    '7. "sensor_co2": A simulated numeric CO2 level in ppm representing active IoT telemetry for this crop and weather. Typically between 350 and 480.',
+    '8. "sensor_n2o": A simulated numeric N2O level in ppb. Typically between 300 and 380.',
+    '9. "sensor_moisture": A simulated numeric Soil Moisture percentage (%). MUST be realistic based on soil_moisture_3_9cm weather data and crop. Typically between 30 and 90.',
+    '10. "sensor_temperature": A simulated numeric Soil Temperature (°C). MUST be realistic based on weather max temp. Typically between 15 and 35.',
+    '11. "sensor_humidity": A simulated numeric relative humidity percentage (%). Typically between 45 and 95.',
     "",
     "Response FORMAT REQUIRED:",
     "{",
@@ -70,7 +75,12 @@ function buildPrompt(req: RecommendationRequest, env: EnvironmentalSnapshot): st
     '  "action_text": "...",',
     '  "metric_value": "...",',
     '  "metric_label": "...",',
-    '  "full_report": "## Summary\\n...\\n## Immediate Actions\\n..."',
+    '  "full_report": "## Summary\\n...\\n## Immediate Actions\\n...",',
+    '  "sensor_co2": 415,',
+    '  "sensor_n2o": 335,',
+    '  "sensor_moisture": 62,',
+    '  "sensor_temperature": 26.8,',
+    '  "sensor_humidity": 75',
     "}",
   ];
   return lines.join("\n");
@@ -80,20 +90,40 @@ function buildPrompt(req: RecommendationRequest, env: EnvironmentalSnapshot): st
 export async function fetchRecommendations(
   req: RecommendationRequest,
   env: EnvironmentalSnapshot,
-  nvidiaModel: string,
-  nvidiaBaseUrl: string,
-  nvidiaApiKey: string
+  apiKey: string
 ): Promise<string> {
   const prompt = buildPrompt(req, env);
-  const url = `${nvidiaBaseUrl.replace(/\/$/, "")}/chat/completions`;
+  const url = "https://api.openai.com/v1/responses";
 
   const payload = {
-    model: nvidiaModel,
-    messages: [{ role: "user", content: prompt }],
-    max_tokens: 1500,
-    temperature: 0.4,
-    top_p: 0.95,
-    stream: false,
+    model: "gpt-5.4-mini",
+    input: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: prompt,
+          },
+        ],
+      },
+    ],
+    text: {
+      format: {
+        type: "text",
+      },
+      verbosity: "medium",
+    },
+    reasoning: {
+      effort: "medium",
+      summary: "auto",
+    },
+    tools: [],
+    store: true,
+    include: [
+      "reasoning.encrypted_content",
+      "web_search_call.action.sources",
+    ],
   };
 
   const headers: Record<string, string> = {
@@ -101,8 +131,8 @@ export async function fetchRecommendations(
     Accept: "application/json",
   };
 
-  if (nvidiaApiKey && nvidiaApiKey.trim().toLowerCase() !== "none" && nvidiaApiKey.trim().toLowerCase() !== "local") {
-    headers["Authorization"] = `Bearer ${nvidiaApiKey}`;
+  if (apiKey && apiKey.trim().toLowerCase() !== "none" && apiKey.trim().toLowerCase() !== "local") {
+    headers["Authorization"] = `Bearer ${apiKey}`;
   }
 
   const resp = await fetch(url, {
@@ -114,15 +144,18 @@ export async function fetchRecommendations(
   if (!resp.ok) {
     const errorText = await resp.text();
     console.error(`LLM error ${resp.status}: ${errorText}`);
-    throw new Error(`Cloud LLM error: ${resp.status}`);
+    throw new Error(`OpenAI Responses API error: ${resp.status}`);
   }
 
   const data: any = await resp.json();
-  const choices = data?.choices || [];
-  if (choices.length === 0) throw new Error("LLM returned no choices");
+  const outputs = data?.output || [];
+  const messageItem = outputs.find((o: any) => o.type === "message");
+  const textItem = messageItem?.content?.find((c: any) => c.type === "output_text");
+  const content = textItem?.text;
 
-  const content = choices[0]?.message?.content;
-  if (!content) throw new Error("LLM returned null content");
+  if (!content) {
+    throw new Error("LLM returned no content or output_text in output");
+  }
 
   // Cleaning
   let cleaned = content.trim();

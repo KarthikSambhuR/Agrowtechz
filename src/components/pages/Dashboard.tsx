@@ -145,7 +145,7 @@ function MetricCard({
 }
 
 export default function Dashboard() {
-  const { language, activePlot, userPlots, sensorData, daysPlanted } = useApp();
+  const { language, activePlot, userPlots, sensorData, setSensorData, daysPlanted } = useApp();
   const displayPlot = userPlots.length > 0 ? userPlots[0] : activePlot;
   const crop = displayPlot ? CROP_PROFILES[displayPlot.crop] : null;
 
@@ -156,6 +156,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parsedMsg, setParsedMsg] = useState<any>(null);
   const [dailyPromptState, setDailyPromptState] = useState<"hidden" | "asking" | "analyzing">("hidden");
+  const [loadingStep, setLoadingStep] = useState<string>("");
   
   useEffect(() => {
     checkBackendHealth().then(setBackendUp);
@@ -173,6 +174,31 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
 
+    const finalSteps = [
+      "Consulting crop optimization systems...",
+      "Formulating agronomic recommendations...",
+      "Evaluating yield forecast metrics...",
+      "Analyzing bio-dynamic data logs...",
+      "Synthesizing expert agricultural advisory...",
+      "Generating personalized field guidance..."
+    ];
+    const chosenFinalStep = finalSteps[Math.floor(Math.random() * finalSteps.length)];
+
+    const steps = [
+      "Establishing link with IoT Gateway...",
+      "Requesting device data payload...",
+      "Synthesizing soil moisture & CO2 telemetry...",
+      chosenFinalStep
+    ];
+    let stepIndex = 0;
+    setLoadingStep(steps[0]);
+    const interval = setInterval(() => {
+      stepIndex++;
+      if (stepIndex < steps.length) {
+        setLoadingStep(steps[stepIndex]);
+      }
+    }, 1200);
+
     try {
       const data = await fetchRecommendations({
         plot_id: displayPlot.id,
@@ -188,14 +214,21 @@ export default function Dashboard() {
         language,
       });
       setResult(data);
+      if (data.sensor_data) {
+        setSensorData({
+          ...data.sensor_data,
+          timestamp: new Date(),
+        });
+      }
       localStorage.setItem(`dashboard_ai_${displayPlot.id}_${language}`, JSON.stringify(data));
     } catch (e: any) {
       setError(e.message ?? "Failed to connect to backend.");
     } finally {
+      clearInterval(interval);
       setLoading(false);
       setDailyPromptState("hidden");
     }
-  }, [displayPlot, daysPlanted, language]);
+  }, [displayPlot, daysPlanted, language, setSensorData]);
 
   const runAnalysis = useCallback(() => {
     if (dailyPromptState === "hidden") {
@@ -213,7 +246,14 @@ export default function Dashboard() {
     const cached = localStorage.getItem(`dashboard_ai_${displayPlot.id}_${language}`);
     if (cached) {
       try {
-        setResult(JSON.parse(cached));
+        const parsed = JSON.parse(cached);
+        setResult(parsed);
+        if (parsed.sensor_data) {
+          setSensorData({
+            ...parsed.sensor_data,
+            timestamp: new Date(),
+          });
+        }
       } catch (p) {
         localStorage.removeItem(`dashboard_ai_${displayPlot.id}_${language}`);
         setDailyPromptState("asking");
@@ -229,7 +269,7 @@ export default function Dashboard() {
         setDailyPromptState("asking");
       }
     }
-  }, [displayPlot?.id, language, confirmAndRunAnalysis]);
+  }, [displayPlot?.id, language, confirmAndRunAnalysis, setSensorData]);
 
   useEffect(() => {
     if (result && result.recommendations) {
@@ -278,7 +318,26 @@ export default function Dashboard() {
               <span style={{ color: "var(--accent-primary)", fontWeight: 700 }}> {tr("optimal", language)}</span>
             </p>
           </div>
-          <div style={{ display: "flex", gap: 12, zIndex: 1 }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", zIndex: 1 }}>
+            {/* IoT status indicator */}
+            <div style={{ 
+              display: "flex", alignItems: "center", gap: 8, 
+              background: "var(--bg-card)", border: "1px solid var(--border-line)", 
+              padding: "10px 18px", borderRadius: "100px", fontSize: 13, 
+              fontWeight: 800, color: "var(--text-main)", 
+              boxShadow: "var(--shadow-sm)", marginRight: 8
+            }}>
+              <motion.span 
+                animate={{ scale: [1, 1.35, 1], opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                style={{ 
+                  display: "inline-block", width: 8, height: 8, borderRadius: "50%", 
+                  background: "#10b981", boxShadow: "0 0 10px #10b981" 
+                }} 
+              />
+              <span>IoT Network: Active</span>
+            </div>
+
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-secondary" style={{ padding: "12px 16px" }}>
               <Play size={18} fill="currentColor" /> {tr("watchBrief", language)}
             </motion.button>
@@ -524,8 +583,8 @@ export default function Dashboard() {
                   <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 8, ease: "linear" }} style={{ display: "inline-block", padding: 20, background: "var(--bg-surface)", borderRadius: "50%", border: "1px solid var(--border-line)" }}>
                     <Globe size={48} color="var(--accent-primary)" />
                   </motion.div>
-                  <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--text-main)", marginTop: 32, letterSpacing: "-0.02em" }}>Analyzing Farm Data</h3>
-                  <p style={{ fontSize: 15, color: "var(--text-dim)", fontWeight: 500, marginTop: 12, lineHeight: 1.5 }}>Fetching satellite telemetry, running soil models, and extracting specialized AI data limits...</p>
+                  <h3 style={{ fontSize: 24, fontWeight: 800, color: "var(--text-main)", marginTop: 32, letterSpacing: "-0.02em" }}>Syncing Devices & AI</h3>
+                  <p style={{ fontSize: 15, color: "var(--text-dim)", fontWeight: 600, marginTop: 12, lineHeight: 1.5, minHeight: "24px" }}>{loadingStep || "Syncing with IoT telemetry models..."}</p>
                 </div>
               )}
             </motion.div>

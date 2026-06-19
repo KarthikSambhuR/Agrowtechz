@@ -61,6 +61,14 @@ export interface EnvironmentalSnapshot {
   weather: WeatherData;
 }
 
+export interface SensorData {
+  co2: number;
+  n2o: number;
+  moisture: number;
+  temperature: number;
+  humidity: number;
+}
+
 export interface RecommendationResponse {
   plot_id: string;
   plot_name: string;
@@ -69,6 +77,7 @@ export interface RecommendationResponse {
   recommendations: string;
   model_used: string;
   data_sources: string[];
+  sensor_data?: SensorData;
 }
 
 export interface ApiError {

@@ -10,6 +10,7 @@ const recommendations = new Hono<{
     NVIDIA_MODEL: string;
     NVIDIA_BASE_URL: string;
     NVIDIA_API_KEY: string;
+    OPENAI_API_KEY?: string;
   };
 }>();
 
@@ -37,13 +38,34 @@ recommendations.post("/", async (c) => {
 
   // 3. Call LLM
   try {
+    const apiKey = c.env.OPENAI_API_KEY || c.env.NVIDIA_API_KEY;
     const recommendationText = await fetchRecommendations(
       req,
       env,
-      c.env.NVIDIA_MODEL,
-      c.env.NVIDIA_BASE_URL,
-      c.env.NVIDIA_API_KEY
+      apiKey
     );
+
+    let sensorData = undefined;
+    try {
+      const parsedRec = JSON.parse(recommendationText);
+      if (
+        parsedRec.sensor_co2 !== undefined ||
+        parsedRec.sensor_n2o !== undefined ||
+        parsedRec.sensor_moisture !== undefined ||
+        parsedRec.sensor_temperature !== undefined ||
+        parsedRec.sensor_humidity !== undefined
+      ) {
+        sensorData = {
+          co2: Number(parsedRec.sensor_co2 ?? 400),
+          n2o: Number(parsedRec.sensor_n2o ?? 320),
+          moisture: Number(parsedRec.sensor_moisture ?? 60),
+          temperature: Number(parsedRec.sensor_temperature ?? 25),
+          humidity: Number(parsedRec.sensor_humidity ?? 70),
+        };
+      }
+    } catch (e) {
+      console.warn("Could not parse sensor data from recommendations text", e);
+    }
 
     const response: RecommendationResponse = {
       plot_id: req.plot_id,
@@ -51,8 +73,9 @@ recommendations.post("/", async (c) => {
       crop: req.crop,
       environmental_snapshot: env,
       recommendations: recommendationText,
-      model_used: c.env.NVIDIA_MODEL,
-      data_sources: ["SoilGrids v2 (ISRIC)", "Open-Meteo", `NVIDIA NIM / ${c.env.NVIDIA_MODEL}`],
+      model_used: "Agrowtechz AI Engine",
+      data_sources: ["SoilGrids v2 (ISRIC)", "Open-Meteo", "Agrowtechz Agri-Brain"],
+      sensor_data: sensorData,
     };
 
     return c.json(response);

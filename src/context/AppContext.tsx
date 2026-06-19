@@ -222,6 +222,7 @@ interface AppState {
   activePlot: Plot | null;
   setActivePlot: (p: Plot | null) => void;
   sensorData: SensorData;
+  setSensorData: (data: SensorData) => void;
   theme: "light" | "dark";
   setTheme: (theme: "light" | "dark") => void;
   weather: WeatherForecast[];
@@ -423,7 +424,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       language, setLanguage,
       activePage, setActivePage,
       plots, userPlots, activePlot, setActivePlot,
-      sensorData,
+      sensorData, setSensorData,
       weather: DEMO_WEATHER,
       npk: activePlot ? CROP_PROFILES[activePlot.crop].npkNeeds : null,
       notifications, markNotificationRead,
